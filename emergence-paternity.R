@@ -1,5 +1,8 @@
-#Emergence in relation to paternity
 
+
+#TEST EFFECT OF EMERGENCE TIME ON EXTRA-PAIR SIRING SUCCESS   
+
+#Get data
   #Get table with treated males   
     d3 = treat2[,.(ID, treatment, em_time)]
   #Merge with paternity data  

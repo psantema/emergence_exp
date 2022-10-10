@@ -1,5 +1,6 @@
 
-#Load packages and connect to databse
+
+#Load packages
     require(data.table)
     require(ggplot2)
     require(gridExtra)
@@ -11,12 +12,15 @@
     require(gridExtra)
     require(lme4)
     require(lmerTest)
+    require(grid)
     
+    
+#Set connection to local database    
     Sys.setenv(TZ='CEST')
     con= dbcon(user = 'psantema', pwd = 'psantema2405', host = 'scidb.mpio.orn.mpg.de')
     
     
-#Get transponders table
+#Get table with all IDs and transponder numbers
     transponders_adults = as.data.table(dbq(con, 'SELECT ID, transponder FROM BTatWESTERHOLZ.ADULTS 
                        	                                    WHERE transponder is not NULL'))
     transponders_field = as.data.table(dbq(con, 'SELECT ID, transponder FROM FIELD_2021_BTatWESTERHOLZ.ADULTS 
@@ -31,9 +35,10 @@
     transponders = rbind(transponders_adults, transponders_field, transponders_chicks, transponders_new)
     transponders = as.data.table(apply(transponders, 2, toupper))
     transponders = unique(transponders)
+    write.csv(transponders, file='data/transponders.csv')
     
     
-#Get age table    
+#Get table with age of each ID    
     age = dbq(con, 'SELECT ID, min(dt) firstCap , 
 				IF ( month(min(dt)) > 7, year(min(dt))+1, year(min(dt)) ) season, year(min(dt)) `year`  , min(age) ageFirstCap from 
 			     (SELECT DISTINCT ID, 0 age, date_time dt from BTatWESTERHOLZ.CHICKS 
@@ -51,78 +56,92 @@
     age = age[,.(ID, year_, age)]
     age = age[year_==2021 & !is.na(ID)]
     age[, year_ := NULL]
-   
+    write.csv(age, file='data/age.csv')
 
-#Get sex table    
+    
+#Get sex of each ID  
     sex = as.data.table(dbq(con, 'SELECT ID, sex FROM BTatWESTERHOLZ.SEX'))
-    sex_lab = data.table(read.csv(file = 'data/sex_lab.csv', sep = ",", stringsAsFactors = FALSE))
-    sex = rbind(sex, sex_lab)
-    sex = merge(transponders, sex, by = 'ID', all.x = TRUE, allow.cartesian = TRUE)
-    sex = unique(sex)
-    sex = sex[transponder!='AEB0000000008001']
-    sex[, n := .N, by=transponder]
-    sex = sex[n==1]
-    sex[, n:=NULL]
-    sex = sex[,.(ID, sex)]
-    sex = unique(sex)
+    write.csv(sex, file='data/sex.csv')
     
     
 #Get table with all breeding males 
     males = data.table(read.csv(file = 'data/paternity2021.csv', sep = ",", stringsAsFactors = FALSE))
     males = unique(males[epy==0,.(ID=father)])
     males[, ID := toupper(ID)]
+    write.csv(males, file='data/males.csv')
 
 
-#Get treated males
-    treat = data.table(read.csv(file = 'data/treatment.csv', sep = ",", stringsAsFactors = FALSE))
-    treat[, treatment := ifelse(treatment=='light',1,0)]
-    
-    
 #Get males who sired epp    
     pat = data.table(read.csv(file = 'data/paternity2021.csv', sep = ",", stringsAsFactors = FALSE))
     pat = pat[epy==1,. (females=length(unique(mother)), young=.N, epp=max(epy)), by=father]
     names(pat)[names(pat)=="father"] <- "ID"
     pat[, ID := toupper(ID)]
     pat = pat[ID!=""]
-    
+    write.csv(pat, file='data/pat.csv')
 
     
 #Get sunrise times     
     sunrise = data.table(read.csv(file = 'data/sunrise.csv', sep = ",", stringsAsFactors = FALSE))  
 
-
+    
+#Get datae of first egg of each box  
+    firstEgg = as.data.table(dbq(con, 'SELECT box, Date(date_time) date_ FROM FIELD_2021_BTatWESTERHOLZ.NESTS
+                                     WHERE eggs=1'))    
+    firstEgg[, min := min(date_), by=c('box')]    
+    firstEgg = firstEgg[min==date_]
+    firstEgg[, min := NULL]
+    write.csv(firstEgg, file='data/firstEgg.csv')
+    
+    
 #Get emergence times
+  #get all transponder readings for relevent period   
     em = dbq(con, 'SELECT site box, date(datetime_) date_, time(datetime_) time_, transponder FROM 
                                                 BTatWESTERHOLZ.transponders WHERE 
                                                 datetime_>= "2021-04-01" and datetime_<= "2021-05-04" ') 
     em = unique(em)
+  #convert time to numeric  
     em[, time_ := chron(times=time_)]
     em[, time_ := chron(times=time_)]
     em[, time_ := as.numeric(time_)*24]
+  #convert date to April day   
     em[, yday := yday(date_)]
     em[, april_day := yday-90]
+  #add surrise times
     em = merge(em, sunrise[,.(sunrise,yday)], by='yday')
+  #exclude recordings after sunrise  
     em = em[time_<sunrise]
+  #convert time to minutes relative to sunrise      
     em[, em_time := (time_-sunrise)*60]
+  #keep the last recording before sunrise (measure of emergence time)  
     em[, min_time := max(time_), by=c('box', 'date_', 'transponder')]
     em = em[time_==min_time]
     em[, min_time:=NULL]
+  #add transponder  
     em = merge(em, transponders, by='transponder', all.x=TRUE, allow.cartesian=TRUE)
-   
+  #save table  
+    write.csv(em, file='data/em.csv')
+    
      
-#get treatment summary    
+#Get treatment table
+  #Load table  
+    treat = data.table(read.csv(file = 'data/treatment.csv', sep = ",", stringsAsFactors = FALSE))
+    treat[, treatment := ifelse(treatment=='light',1,0)]
+    
+    
+#Get treatment summary for each individual    
+  #add emergence time data  
     treat2 = merge(treat[,.(box, ID, treatment, put_out, removed)], em, by=c('box','ID'))
+  #add age  
     treat2 = merge(treat2, age, by=c('ID'), all.x=TRUE)
     treat2[, age := ifelse(is.na(age),1,age)]
-    treat2[, exclude := ifelse(date_ > removed |
-                               date_ <= put_out,1,0)  ]
-    treat2 = treat2[exclude==0]
-    treat2[, mean_em_time := mean(em_time), by=yday]
-    treat2[, rel_em_time := em_time-mean_em_time]
+  #exclude data from before treatment started or after treatment stopped  
+    treat2 = treat2[date_ <= removed & date_ > put_out  ]
+  #make tretament factor  
     treat2[, treatment := as.factor(treatment)]
-    treat2 = treat2[date_>=put_out & date_<removed, .(em_time=mean(em_time), rel_em_time=mean(rel_em_time), age=mean(age), treatment=first(treatment), nights=.N, fertile=sum(fertile)), by=ID]
-  #add treatment score
+  #summarise data for eahc ID  
+    treat2 = treat2[, .(em_time=mean(em_time), age=mean(age), treatment=first(treatment), nights=.N), by=ID]
+  #add treat2ment score
     score = data.table(read.csv(file = 'data/score.csv', sep = ",", stringsAsFactors = FALSE))  
     treat2 = merge(treat2, score, by=c('ID'), all.x=TRUE)
-    
+    write.csv(treat2, file='data/treat2.csv')
     
