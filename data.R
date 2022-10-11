@@ -124,9 +124,8 @@
      
 #Get treatment table
   #Load table  
-    treat = data.table(read.csv(file = 'data/treatment.csv', sep = ",", stringsAsFactors = FALSE))
-    treat[, treatment := ifelse(treatment=='light',1,0)]
-    
+    treat = data.table(read.csv(file = 'data/treat.csv', sep = ",", stringsAsFactors = FALSE))
+
     
 #Get treatment summary for each individual    
   #add emergence time data  
