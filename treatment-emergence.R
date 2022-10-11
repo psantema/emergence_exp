@@ -6,8 +6,6 @@
     d1[, exclude := ifelse((date_>'2021-04-07' & date_<='2021-05-03' & date_>removed) |
                               (date_>'2021-04-07' & date_<='2021-05-03' & date_<put_out),1,0)  ]
     d1 = d1[exclude==0]
-    d1 = merge(d1, fertile, by=c('april_day'))
-    #d1 = d1[day3>0]
     d1[, treatment := as.factor(treatment)]
     d1 = merge(d1, age, by=c('ID'), all.x=TRUE)
     d1[, age := ifelse(ID=='B5A9457',1,age)]
