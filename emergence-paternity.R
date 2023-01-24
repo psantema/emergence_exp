@@ -57,4 +57,4 @@
       theme(axis.title=element_text(size=14),
             axis.text=element_text(size=12))
     
-    ggsave(filename="fig4.png", width = 9, height = 6)
+    ggsave(filename="fig4.tiff", width = 9, height = 6)

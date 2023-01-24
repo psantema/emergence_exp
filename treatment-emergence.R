@@ -68,5 +68,5 @@
             axis.title=element_text(size=14),
             plot.tag=element_text(size=19)) 
     
-    ggsave(filename="fig1.png", width = 9, height = 6)
+    ggsave(filename="fig1.tiff", width = 9, height = 6)
     

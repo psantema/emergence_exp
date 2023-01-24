@@ -56,7 +56,7 @@
             axis.text.y=element_text(size=12),
             axis.text.x=element_text(size=14))
     
-    ggsave(filename="fig2.png", width = 6, height = 5)
+    ggsave(filename="fig2.tiff", width = 6, height = 5)
     
     
     

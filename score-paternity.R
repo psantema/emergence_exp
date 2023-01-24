@@ -69,6 +69,6 @@
 
 #Combine figures and save plot    
     p = grid.arrange(p1, p2, ncol=2, bottom=textGrob("Treatment score", gp=gpar(fontsize=16)))
-    ggsave(p, filename="fig3.png", width = 10, height = 5)
+    ggsave(p, filename="fig3.tiff", width = 10, height = 5)
     
 
