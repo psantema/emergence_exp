@@ -4,7 +4,7 @@
 
 #Get data
   #Get table with treated males   
-    d3 = treat2[,.(ID, treatment, em_time)]
+    d3 = treat2[,.(ID, treatment, em_time, nights)]
   #Merge with paternity data  
     d3 = merge(d3, pat[,.(ID, epp)], by=c('ID'), all.x=TRUE)
     d3[, epp := ifelse(is.na(epp),0,epp)]
@@ -44,14 +44,14 @@
     ggplot() +
       geom_line(data=dd1, aes(x=em_time, y=fit)) +
       geom_ribbon(data=dd1, aes(x=em_time, ymin=lower, ymax=upper), fill="blue", alpha=0.25) +
-      geom_point(data=d3[epp==1 & treatment==1], aes(y=1, x=em_time), pch = 21, size=2.5, fill="blue", alpha=.75) +
-      geom_point(data=d3[epp==0 & treatment==1], aes(y=0, x=em_time), pch = 21, size=2.5, fill="blue", alpha=.75) +
+      geom_point(data=d3[epp==1 & treatment==1], aes(y=1.005, x=em_time), pch = 21, size=2.5, fill="blue", alpha=.5) +
+      geom_point(data=d3[epp==0 & treatment==1], aes(y=0.005, x=em_time), pch = 21, size=2.5, fill="blue", alpha=.5) +
       geom_line(data=dd2, aes(x=em_time, y=fit)) +
       geom_ribbon(data=dd2, aes(x=em_time, ymin=lower, ymax=upper), fill="red", alpha=0.25) +
-      geom_point(data=d3[epp==1 & treatment==0], aes(y=1, x=em_time), pch = 21, size=2.5, fill="red", alpha=.75) +
-      geom_point(data=d3[epp==0 & treatment==0], aes(y=0, x=em_time), pch = 21, size=2.5, fill="red", alpha=.75) +
-      ylab("Proportion siring epp") + xlab("Average emergence time (min. from sunrise)") +
-      ylim(0,1) + xlim(min(d3$em_time),max(d3$em_time)) +
+      geom_point(data=d3[epp==1 & treatment==0], aes(y=.995, x=em_time), pch = 21, size=2.5, fill="red", alpha=.5) +
+      geom_point(data=d3[epp==0 & treatment==0], aes(y=-0.005, x=em_time), pch = 21, size=2.5, fill="red", alpha=.5) +
+      ylab("Proportion siring EPY") + xlab("Average emergence time (min. from sunrise)") +
+      ylim(-0.01,1.01) + xlim(min(d3$em_time),max(d3$em_time)) +
       ggtitle("") +
       theme_classic() + 
       theme(axis.title=element_text(size=14),

@@ -3,7 +3,7 @@
 
 #Get data  
   #Get table with treated males and other breeding males  
-    d2 = rbind(males[ID!='' & !(ID %in% treat2$ID),.(ID, treatment=2, score1=NA, score2=NA)], treat2[,.(ID, treatment, score1, score2)])
+    d2 = rbind(males[ID!='' & !(ID %in% treat2$ID),.(ID, treatment=2, score1=NA, score2=NA, days=NA, females1=NA, females2=NA)], treat2[,.(ID, treatment, score1, score2, days, females1, females2)])
   #Add paternity data  
     d2 = merge(d2, pat[,.(ID, epp)], by=c('ID'), all.x=TRUE)
     d2[, epp := ifelse(is.na(epp),0,epp)]
@@ -12,6 +12,7 @@
   #Add age of new individuals based on field observations  
     d2[, age := ifelse(ID=="B4X8963" | ID=="B4X8969" | ID=="B4X8991" | ID=="B5A9457" | ID=="B5A9459" | ID=="B5A9503" | ID=="B5A9520" |ID=="B5A9524", 1, age)]
     d2[, age := ifelse(ID=="B5A9527", 2, age)]
+    d2[, age := as.factor(age)]
   #Set light-treatment as referecne level  
     d2[, treatment := relevel(treatment, ref = "1")]
   
@@ -44,7 +45,8 @@
     ggplot() +
       geom_errorbar(data=dd, aes(x=treatment, ymin=upper, ymax=lower), width=.5) +
       geom_point(data=dd, aes(x=treatment, y=fit)) +
-      ylab("Proportion siring epp") + xlab("") +
+      ylab("Proportion siring EPY") + xlab("") +
+      #scale_x_discrete(labels = c('Control','Treatment', 'Untreated')) +
       scale_x_discrete(labels = c('Control\nn = 15','Treatment\nn = 31', 'Untreated\nn = 92')) +
       #annotate("text", size=4, x=dd$treatment, y=dd$lower-.03, label=dd$N) +
       ylim(0,1) +

@@ -1,36 +1,5 @@
-# emergence_exp
-
-
-# Experiment advancing emergennce time of blue tit males to examine effects on extra-pair siring success
-
-
-### Description of scripts
-  data
-    Produces all main data files and saves them in 'data' folder
-    NOTE: Retrieves data from local database and cannot be run without credentials. However, the resulting files are available in 'data' folder.
-  
-  treatment-emergence
-    Analyses and figures examining the relation between the treatment and emergence time
-  
-  treatment-paternity
-    Analyses and figures examining the relation between the treatment and paternity
-  
-  score-paternity
-    Analyses and figures examining the relation between the strength of the treatment and paternity
-
-  emergence-paternity
-    Analyses and figures examining the relation between the emergence time and paternity
-
-  neighbour
-    Calculates neighbourhood order between each combination of two territories
-
-  treatment_score
-    Calculates the strength of the treatment for each male (based on the number of mornings it was manipulated and the number of females in the local neighbourhood that were fertile on those days)
-
-
 
 ### Description of data files
-
 
   age.csv (contains ages of all individuals in each season)
     ID  - unique identity for each individual
@@ -108,4 +77,6 @@
     females1  - number of females 1st order neighbourhood (NA=no data)
     score2    - treatment score 1st + 2nd order neighbourhood (NA=no data)
     females2  - number of females 1st order neighbourhood (NA=no data)
+ 
+ 
  

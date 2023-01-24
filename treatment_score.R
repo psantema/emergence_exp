@@ -19,7 +19,7 @@
     
 #Combine data
   #Get manipulated males
-    mm = d1[treatment=='light' & date_>put_out & date_<=removed, .(ID, box, date_=as.Date(date_))]
+    mm = d1[treatment==1 & date_>put_out & date_<=removed, .(ID, box, date_=as.Date(date_))]
   #Add neighbouring boxes for each males for each night
     mm = merge(mm, neighbour, by.x=c('box'), by.y=c('box1'))
   #Add whether or not female was fertile for each neighbouring box   
@@ -28,13 +28,19 @@
     
     
 #Get summaries for each male  
-  #Get summary socre for 1st order neighbourhood  
-    score1 = mm[no<=1,.(score1 = sum(fertile)), by=c('ID')]
-  #Get summary socre for 1st and 2nd order neighbourhood   
-    score2 = mm[no<=2,.(score2 = sum(fertile)), by=c('ID')]
-  #Combine summary scores
-    scoreb = merge(score1, score2, by=c('ID'))
+  #Get summary score for 1st order neighbourhood  
+    score1 = mm[no<=1 & fertile=1,.(days=length(unique(date_)), score1=sum(fertile), females1=length(unique(date_))), by=c('ID')]
+  #Get summary score for 1st and 2nd order neighbourhood   
+    score2 = mm[no<=2 & fertile,.(score2=sum(fertile), females2=length(unique(date_))), by=c('ID')]
 
+  #Combine summary scores
+    score = merge(score1, score2, by=c('ID'))
+  #Adding missing scoree
+    foo = data.table(ID='B4X1585', days=1, score1=0, females1=0, score2=0, females2=0)
+  #combine
+    score = rbind(score, foo)
+    
+    
 #save file
     write.csv(score, file='./data/score.csv', row.names=FALSE)  
        

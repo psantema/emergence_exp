@@ -22,7 +22,7 @@
       geom_ribbon(data=dd, aes(x=score1, ymin=lower, ymax=upper), alpha=0.25) +
       geom_point(data=d2[epp==1 & treatment==1], aes(y=1, x=score1), size=2.5, alpha=.5) +
       geom_point(data=d2[epp==0 & treatment==1], aes(y=0, x=score1), size=2.5, alpha=.5) +
-      ylab("Proportion siring epp") + xlab("1st order neighborhood") +
+      ylab("Proportion siring EPY") + xlab("1st order neighborhood") +
       labs(tag = "a)") +
       ylim(0,1) +
       theme_classic() +

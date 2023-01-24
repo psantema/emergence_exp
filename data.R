@@ -132,12 +132,13 @@
     treat2 = merge(treat[,.(box, ID, treatment, put_out, removed)], em, by=c('box','ID'))
   #add age  
     treat2 = merge(treat2, age, by=c('ID'), all.x=TRUE)
-    treat2[, age := ifelse(is.na(age),1,age)]
+    treat2[, age := ifelse(is.na(age),1,age)]    
+    treat2[, age := as.factor(age)]
   #exclude data from before treatment started or after treatment stopped  
     treat2 = treat2[date_ <= removed & date_ > put_out  ]
   #make tretament factor  
     treat2[, treatment := as.factor(treatment)]
-  #summarise data for eahc ID  
+  #summarise data for each ID  
     treat2 = treat2[, .(em_time=mean(em_time), age=mean(age), treatment=first(treatment), nights=.N), by=ID]
   #add treat2ment score
     score = data.table(read.csv(file = 'data/score.csv', sep = ",", stringsAsFactors = FALSE))  
