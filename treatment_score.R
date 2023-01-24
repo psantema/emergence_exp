@@ -29,9 +29,9 @@
     
 #Get summaries for each male  
   #Get summary score for 1st order neighbourhood  
-    score1 = mm[no<=1 & fertile=1,.(days=length(unique(date_)), score1=sum(fertile), females1=length(unique(date_))), by=c('ID')]
+    score1 = mm[no<=1 & fertile==1,.(days=length(unique(date_)), score1=sum(fertile), females1=length(unique(date_))), by=c('ID')]
   #Get summary score for 1st and 2nd order neighbourhood   
-    score2 = mm[no<=2 & fertile,.(score2=sum(fertile), females2=length(unique(date_))), by=c('ID')]
+    score2 = mm[no<=2 & fertile==1,.(score2=sum(fertile), females2=length(unique(date_))), by=c('ID')]
 
   #Combine summary scores
     score = merge(score1, score2, by=c('ID'))

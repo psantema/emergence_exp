@@ -43,7 +43,6 @@
 				IF ( month(min(dt)) > 7, year(min(dt))+1, year(min(dt)) ) season, year(min(dt)) `year`  , min(age) ageFirstCap from 
 			     (SELECT DISTINCT ID, 0 age, date_time dt from BTatWESTERHOLZ.CHICKS 
 			      UNION SELECT DISTINCT ID, age, capture_date_time dt from BTatWESTERHOLZ.ADULTS
-			      UNION SELECT DISTINCT ID, age, date_time_caught dt from FIELD_BTatWESTERHOLZ.ADULTS 
 			     where ID is not null and ID not like "X%" ) x where dt > "0000-00-00" group by ID', enhance = TRUE)
     age = age[, .(ID, season, ageFirstCap)]
     age = age[, .(year_ = season: 2021), by = .(ID, ageFirstCap)]
@@ -139,7 +138,7 @@
   #make tretament factor  
     treat2[, treatment := as.factor(treatment)]
   #summarise data for each ID  
-    treat2 = treat2[, .(em_time=mean(em_time), age=mean(age), treatment=first(treatment), nights=.N), by=ID]
+    treat2 = treat2[, .(em_time=mean(em_time), age=first(age), treatment=first(treatment), nights=.N), by=ID]
   #add treat2ment score
     score = data.table(read.csv(file = 'data/score.csv', sep = ",", stringsAsFactors = FALSE))  
     treat2 = merge(treat2, score, by=c('ID'), all.x=TRUE)
